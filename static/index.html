@@ -8,3 +8,153 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="stylesheet" href="/style.css">
   </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <a class="brand" href="/" aria-label="Lista de Chamadas, início">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none"><path d="M9 8h14M9 14h14M9 20h8" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="23" cy="22" r="5" fill="#dce9ff" stroke="currentColor" stroke-width="2"/><path d="m21 22 1.4 1.4L25 20.8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+          <span><strong>Presença</strong><small>lista de chamadas</small></span>
+        </a>
+        <div class="sidebar-label">CHAMADA DE HOJE</div>
+        <div class="side-nav active"><span class="nav-icon">▤</span><span>Lista de presença</span></div>
+        <div class="sidebar-note">
+          <span class="privacy-icon">◈</span>
+          <strong>Seus dados ficam aqui</strong>
+          <p>Reconhecimento e cadastro acontecem neste computador. Nenhuma imagem é enviada para a internet.</p>
+        </div>
+        <div class="sidebar-footer"><span class="status-dot"></span> Aplicativo local</div>
+      </aside>
+
+      <main class="main-content">
+        <header class="topbar">
+          <div class="mobile-brand"><span class="brand-mark small">✓</span> Presença</div>
+          <div class="local-pill"><span class="status-dot"></span> Dados locais e privados</div>
+        </header>
+
+        <section class="page-heading">
+          <div>
+            <div class="eyebrow">REGISTRO DIÁRIO</div>
+            <h1>Lista de chamadas</h1>
+            <p id="today-date" class="subtitle">Carregando data...</p>
+          </div>
+          <a class="button button-secondary export-button" href="/api/export.csv" download="lista-de-presenca.csv">
+            <span aria-hidden="true">↓</span> Exportar CSV
+          </a>
+        </section>
+
+        <section class="stats-grid" aria-label="Resumo da chamada">
+          <article class="stat-card">
+            <span class="stat-icon blue">✓</span>
+            <div><span class="stat-label">Presentes</span><strong id="present-count">0</strong></div>
+            <span id="present-fraction" class="stat-foot">de 0 pessoas</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-icon violet">☷</span>
+            <div><span class="stat-label">Pessoas cadastradas</span><strong id="student-count">0</strong></div>
+            <span class="stat-foot">nesta lista</span>
+          </article>
+          <article class="stat-card">
+            <span class="stat-icon green">◷</span>
+            <div><span class="stat-label">Em aberto</span><strong id="pending-count">0</strong></div>
+            <span class="stat-foot">aguardando presença</span>
+          </article>
+        </section>
+
+        <section class="work-grid">
+          <article class="panel camera-panel">
+            <div class="panel-heading">
+              <div><span class="section-kicker">CHAMADA AUTOMÁTICA</span><h2>Reconhecimento facial</h2></div>
+              <span id="camera-badge" class="badge badge-idle"><span class="badge-dot"></span> Desativada</span>
+            </div>
+            <div class="camera-view" id="camera-view">
+              <img id="camera-feed" alt="Imagem da câmera para reconhecimento facial" hidden>
+              <div id="camera-placeholder" class="camera-placeholder">
+                <span class="camera-placeholder-icon">◎</span>
+                <strong>Iniciando chamada automática</strong>
+                <span>O reconhecimento facial ativa ao abrir o aplicativo.</span>
+              </div>
+            </div>
+            <div class="camera-controls">
+              <button id="camera-toggle" class="button button-primary"><span aria-hidden="true">◎</span> Ativar chamada</button>
+              <span class="camera-hint">A chamada inicia automaticamente.<br>Rostos cadastrados são marcados como presentes.</span>
+            </div>
+            <div id="camera-message" class="inline-message" role="status">Iniciando o reconhecimento facial...</div>
+            <div class="notice">
+              <span aria-hidden="true">ⓘ</span>
+              <p>O reconhecimento pode falhar ou identificar alguém incorretamente. Confira a lista e use a marcação manual quando necessário. A câmera não comprova que a pessoa está presente fisicamente.</p>
+            </div>
+          </article>
+
+          <article class="panel enrollment-panel">
+            <div class="panel-heading">
+              <div><span class="section-kicker">NOVO CADASTRO</span><h2>Adicionar pessoa</h2></div>
+              <span class="add-icon">+</span>
+            </div>
+            <p class="panel-description">Cadastre o nome e uma amostra facial para habilitar o reconhecimento.</p>
+            <form id="enroll-form">
+              <label for="person-name">Nome completo</label>
+              <input id="person-name" name="name" type="text" maxlength="100" autocomplete="off" placeholder="Ex.: Maria Silva" required>
+              <label class="consent-check">
+                <input id="consent" type="checkbox" required>
+                <span>Tenho o consentimento desta pessoa para cadastrar seus dados faciais.</span>
+              </label>
+              <button id="enroll-button" class="button button-outline" type="submit">Cadastrar com a câmera</button>
+            </form>
+            <div class="storage-note"><span aria-hidden="true">🔒</span><span>Armazenamos somente os dados necessários para comparar os rostos. As imagens da câmera não são guardadas.</span></div>
+            <div id="enroll-message" class="inline-message" role="status"></div>
+          </article>
+        </section>
+
+        <section class="panel roster-panel">
+          <div class="roster-heading">
+            <div><span class="section-kicker">ACOMPANHAMENTO</span><h2>Pessoas da lista</h2></div>
+            <label class="search-box"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar pessoa..." aria-label="Buscar pessoa"></label>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>PESSOA</th><th>STATUS</th><th>HORÁRIO</th><th class="actions-heading">AÇÃO</th></tr></thead>
+              <tbody id="roster-body"></tbody>
+            </table>
+            <div id="empty-state" class="empty-state">
+              <span>☷</span>
+              <strong>A lista ainda está vazia</strong>
+              <p>Adicione uma pessoa acima para começar a chamada.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel history-panel">
+          <div class="roster-heading">
+            <div><span class="section-kicker">REGISTROS INDIVIDUAIS</span><h2>Histórico de presença</h2></div>
+            <div class="history-controls">
+              <label for="history-date">Filtrar por data</label>
+              <input id="history-date" type="date" aria-label="Filtrar histórico por data">
+              <a id="history-export" class="button button-secondary" href="/api/history.csv" download="historico-de-presenca.csv">
+                <span aria-hidden="true">↓</span> Exportar histórico
+              </a>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>PESSOA</th><th>DATA</th><th>HORÁRIO</th><th>TIPO DE REGISTRO</th></tr></thead>
+              <tbody id="history-body"></tbody>
+            </table>
+            <div id="history-empty" class="empty-state">
+              <span>◷</span>
+              <strong>Nenhuma presença registrada</strong>
+              <p>Os registros de reconhecimento e marcação manual aparecerão aqui.</p>
+            </div>
+          </div>
+          <div class="history-footer">
+            <div id="history-message" class="inline-message" role="status"></div>
+            <button id="history-more" class="button button-secondary" type="button" hidden>Carregar mais</button>
+          </div>
+        </section>
+        <footer class="page-footer">Reconhecimento facial local · As pessoas devem consentir com o cadastro e o uso de seus dados.</footer>
+      </main>
+    </div>
+    <script src="/app.js" defer></script>
+  </body>
+</html>
