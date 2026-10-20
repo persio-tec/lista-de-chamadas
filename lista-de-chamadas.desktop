@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Lista de Chamadas
+Comment=Lista de presença local com reconhecimento facial
+Exec=python3 /opt/lista-de-chamadas/launch.py
+Icon=lista-de-chamadas
+Terminal=false
+Categories=Education;
+StartupNotify=true
