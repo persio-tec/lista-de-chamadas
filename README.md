@@ -31,3 +31,22 @@ Modelos OpenCV Zoo:
 
 - YuNet (`face_detection_yunet_2023mar.onnx`), OpenCV Zoo: <https://github.com/opencv/opencv_zoo/tree/main/models/face_detection_yunet>
 - SFace (`face_recognition_sface_2021dec.onnx`), OpenCV Zoo: <https://github.com/opencv/opencv_zoo/tree/main/models/face_recognition_sface>
+
+Os dois modelos já estão incluídos em `models/`, então o aplicativo funciona
+logo após o clone, sem download adicional.
+
+## Windows e macOS
+
+Há pacotes prontos para instalar sem precisar do Python:
+
+1. Abra a aba **Actions** do repositório no GitHub.
+2. Selecione o fluxo **Build Windows e macOS** e clique em **Run workflow**.
+3. Ao terminar, baixe o artefato desejado na própria execução:
+   - `ListaDeChamadas-Windows` — arquivo `ListaDeChamadas.exe`
+   - `ListaDeChamadas-macOS` — arquivo `ListaDeChamadas.dmg`
+4. No Windows, execute o `.exe`. No macOS, abra o `.dmg` e arraste o aplicativo
+   para a pasta **Aplicativos**.
+
+O executável inicia o servidor local e abre a interface no navegador padrão. Os
+dados continuam sendo salvos apenas neste computador, na pasta de dados do
+usuário (veja a seção **Dados e privacidade**).
