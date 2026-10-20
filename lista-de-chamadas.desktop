@@ -2,8 +2,8 @@
 Type=Application
 Name=Lista de Chamadas
 Comment=Lista de presença local com reconhecimento facial
-Exec=python3 /opt/lista-de-chamadas/launch.py
-Icon=lista-de-chamadas
+Exec=/usr/sbin/python3 /home/persio/Projetos/lista-de-chamadas/launch.py
+Icon=/home/persio/Projetos/lista-de-chamadas/icon.svg
 Terminal=false
 Categories=Education;
 StartupNotify=true
