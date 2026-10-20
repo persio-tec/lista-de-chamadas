@@ -1,0 +1,51 @@
+name: Build Windows e macOS
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar dependencias
+        run: |
+          pip install opencv-python numpy pyinstaller
+      - name: Gerar executavel
+        run: |
+          pyinstaller --clean --noconfirm --name ListaDeChamadas --onefile --windowed --add-data "static;static" --add-data "models;models" --add-data "icon.svg;." main.py
+      - name: Enviar artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: ListaDeChamadas-Windows
+          path: dist/ListaDeChamadas.exe
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Instalar dependencias
+        run: |
+          pip install opencv-python numpy pyinstaller
+      - name: Gerar aplicativo
+        run: |
+          pyinstaller --clean --noconfirm --name ListaDeChamadas --windowed --add-data "static:static" --add-data "models:models" --add-data "icon.svg:." main.py
+      - name: Cria arquivo DMG
+        run: |
+          mkdir -p dist/dmg
+          cp -r dist/ListaDeChamadas.app dist/dmg/
+          hdiutil create -volname "Lista de Chamadas" -srcfolder dist/dmg -ov -format UDZO dist/ListaDeChamadas.dmg
+      - name: Enviar artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: ListaDeChamadas-macOS
+          path: dist/ListaDeChamadas.dmg
