@@ -37,7 +37,7 @@ class AttendanceStoreTests(unittest.TestCase):
         student_id = self.store.add_student_with_face_samples("Maria Silva", samples)
 
         saved = self.store.face_features()
-        self.assertEqual([row[2] for row in saved], [(student_id, "Maria Silva")] * 3)
+        self.assertEqual([row[:2] for row in saved], [(student_id, "Maria Silva")] * 3)
         for result, sample in zip(saved, samples):
             np.testing.assert_array_equal(result[2], sample.reshape(1, -1))
 
@@ -141,7 +141,7 @@ class AttendanceStoreTests(unittest.TestCase):
                 """
             )
             connection.execute(
-                 INSERT INTO students VALUES (1, 'Maria Silva', ?, '2026-01-01')",
+                "INSERT INTO students VALUES (1, 'Maria Silva', ?, '2026-01-01')",
                 (self.feature.tobytes(),),
             )
             connection.execute(
