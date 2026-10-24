@@ -4,6 +4,7 @@ import csv
 import json
 import os
 import sqlite3
+import ssl
 import threading
 import time
 from contextlib import contextmanager
@@ -23,6 +24,10 @@ DATA_DIR = Path(os.environ.get("XDG_DATA_HOME", Path.home() / ".local/share")) /
 DATABASE = DATA_DIR / "chamadas.sqlite3"
 HOST = "127.0.0.1"
 PORT = 8765
+# Certificados locais gerados pelo mkcert (grátis, open source).
+CERTIFICADOS_DIR = Path.home() / ".config" / "certificados-locais"
+ARQUIVO_CERT = CERTIFICADOS_DIR / "localhost.pem"
+ARQUIVO_CHAVE = CERTIFICADOS_DIR / "localhost-key.pem"
 MATCH_THRESHOLD = 0.363
 
 
@@ -820,14 +825,39 @@ class AppHandler(BaseHTTPRequestHandler):
             self._json(500, {"error": f"Falha ao atualizar o rosto: {error}"})
 
 
-def serve():
+def contexto_https():
+    """Monta o contexto TLS com os certificados locais do mkcert.
+
+    Retorna ``None`` quando os certificados ainda não foram gerados, para que
+    o servidor siga em HTTP sem quebrar nada.
+    """
+    if not (ARQUIVO_CERT.exists() and ARQUIVO_CHAVE.exists()):
+        return None
+    contexto = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
+    contexto.load_cert_chain(str(ARQUIVO_CERT), str(ARQUIVO_CHAVE))
+    return contexto
+
+
+def serve(https=False):
     if not hasattr(cv2, "FaceDetectorYN_create") or not hasattr(cv2, "FaceRecognizerSF_create"):
         raise RuntimeError("Este aplicativo precisa do OpenCV com suporte aos modelos faciais YuNet e SFace.")
     AppHandler.store = AttendanceStore()
     AppHandler.camera = CameraService(AppHandler.store)
     server = ThreadingHTTPServer((HOST, PORT), AppHandler)
     server.daemon_threads = True
-    print(f"Lista de Chamadas em http://{HOST}:{PORT}")
+    esquema = "http"
+    if https:
+        contexto = contexto_https()
+        if contexto is None:
+            raise RuntimeError(
+                "Certificados locais não encontrados em "
+                f"{CERTIFICADOS_DIR}. Gere com: mkcert -install && "
+                f"mkcert -cert-file {ARQUIVO_CERT} -key-file {ARQUIVO_CHAVE} "
+                f"localhost 127.0.0.1"
+            )
+        server.socket = contexto.wrap_socket(server.socket, server_side=True)
+        esquema = "https"
+    print(f"Lista de Chamadas em {esquema}://{HOST}:{PORT}")
     server_thread = threading.Thread(target=server.serve_forever, daemon=True)
     server_thread.start()
     try:
