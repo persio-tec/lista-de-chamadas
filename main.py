@@ -35,6 +35,10 @@ class AttendanceStore:
     def __init__(self, database=DATABASE):
         self.database = Path(database)
         self.database.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            os.chmod(self.database.parent, 0o700)
+        except OSError:
+            pass
         with self.transaction() as connection:
             connection.executescript(
                 """
@@ -90,6 +94,12 @@ class AttendanceStore:
                         datetime.now().astimezone().isoformat(timespec="seconds"),
                     ),
                 )
+
+        try:
+            if self.database.exists():
+                os.chmod(self.database, 0o600)
+        except OSError:
+            pass
 
     def connect(self):
         connection = sqlite3.connect(self.database, timeout=10)
